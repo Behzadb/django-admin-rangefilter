@@ -38,6 +38,8 @@ Example:
     INSTALLED_APPS = (
         ...
         'rangefilter',
+        'jalali_date',
+        'jdatetime',
         ...
     )
 
@@ -57,4 +59,15 @@ In admin
     class PostAdmin(admin.ModelAdmin):
         list_filter = (
             ('created_at', DateRangeFilter), ('updated_at', DateTimeRangeFilter),
+        )
+
+.. code:: python
+
+    from django.contrib import admin
+    from rangefilter.filter import JDateRangeFilter, JDateTimeRangeFilter
+
+    @admin.register(Post)
+    class PostAdmin(admin.ModelAdmin):
+        list_filter = (
+            ('created_at', JDateRangeFilter), ('updated_at', JDateTimeRangeFilter),
         )

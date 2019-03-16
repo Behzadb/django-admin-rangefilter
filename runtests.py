@@ -16,6 +16,8 @@ settings.configure(
         'django.contrib.admin',
         'django.contrib.sessions',
         'rangefilter',
+        'jalali_date',
+        'jdatetime',
     ),
     DATABASES={
         'default': {'ENGINE': 'django.db.backends.sqlite3'}
