@@ -24,9 +24,9 @@ from django.contrib.admin.widgets import AdminDateWidget, AdminSplitDateTime as 
 from django.db import models
 
 
-from jalali_date.fields import JalaliDateField, SplitJalaliDateTimeField
+from jalali_date.fields import JalaliDateField, JalaliDateTimeField, SplitJalaliDateTimeField
 from jalali_date.widgets import AdminJalaliDateWidget, AdminSplitJalaliDateTime
-from jalali_date.settings import  JALALI_DATE_DEFAULTS
+from django_jalali.admin.widgets import AdminSplitjDateTime
 from django.utils.encoding import force_str
 from jdatetime import GregorianToJalali, datetime as jalali_datetime
 
@@ -37,8 +37,8 @@ overrides = {
         'widget': AdminJalaliDateWidget
     },
     models.DateTimeField: {
-        'form_class': SplitJalaliDateTimeField,
-        'widget': AdminSplitJalaliDateTime
+        'form_class': JalaliDateTimeField,
+        'widget': AdminJalaliDateWidget
     },
 }
 
@@ -345,7 +345,7 @@ class JDateRangeFilter(admin.filters.FieldListFilter):
     def get_js():
         return [
             StaticNode.handle_simple('admin/js/django_jalali.min.js'),
-            StaticNode.handle_simple('admin/js/admin/admin/DateTimeShortcuts.js'),
+            StaticNode.handle_simple('admin/js/admin/DateTimeShortcuts.js'),
         ]
 
     @staticmethod
@@ -355,7 +355,7 @@ class JDateRangeFilter(admin.filters.FieldListFilter):
             'admin/js/admin/DateTimeShortcuts.js',
         ]
         css = [
-            'widgets.css',
+            'admin/css/widgets.css',
         ]
         return forms.Media(
             js=['admin/js/%s' % url for url in js],
@@ -374,15 +374,15 @@ class JDateTimeRangeFilter(DateRangeFilter):
 
     def _get_form_fields(self):
         return OrderedDict((
-                (self.lookup_kwarg_gte, forms.AdminSplitJalaliDateTime(
+                (self.lookup_kwarg_gte, forms.DateTimeField(
                     label='',
-                    widget=AdminSplitJalaliDateTime(attrs={'placeholder': _('From date')}),
+                    widget=AdminSplitjDateTime(attrs={'placeholder': _('From date')}),
                     localize=True,
                     required=False
                 )),
-                (self.lookup_kwarg_lte, forms.AdminSplitJalaliDateTime(
+                (self.lookup_kwarg_lte, forms.DateTimeField(
                     label='',
-                    widget=AdminSplitJalaliDateTime(attrs={'placeholder': _('To date')}),
+                    widget=AdminSplitjDateTime(attrs={'placeholder': _('To date')}),
                     localize=True,
                     required=False
                 )),
@@ -394,10 +394,12 @@ class JDateTimeRangeFilter(DateRangeFilter):
         date_value_lte = validated_data.get(self.lookup_kwarg_lte, None)
 
         if date_value_gte:
+            date_value_gte = jalali_datetime.strptime(force_str(date_value_gte), format).togregorian()
             query_params['{0}__gte'.format(self.field_path)] = self.make_dt_aware(
                 date_value_gte, self.get_timezone(request)
             )
         if date_value_lte:
+            date_value_lte = jalali_datetime.strptime(force_str(date_value_lte), format).togregorian()
             query_params['{0}__lte'.format(self.field_path)] = self.make_dt_aware(
                 date_value_lte, self.get_timezone(request)
             )
